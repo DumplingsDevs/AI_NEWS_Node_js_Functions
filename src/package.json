@@ -1,5 +1,6 @@
 {
   "name": "src",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -7,7 +8,11 @@
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
-    "@azure/functions": "^4.0.0"
+    "@azure/functions": "^4.0.0",
+    "axios": "^1.6.2",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {},
   "main": "src/functions/*.js"

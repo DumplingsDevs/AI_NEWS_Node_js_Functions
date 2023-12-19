@@ -1,0 +1,60 @@
+{
+	"info": {
+		"_postman_id": "f3969147-a364-4818-bcf4-f968c3978e84",
+		"name": "AI NEWS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Merge Audio",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/Users/kamilbytner/Downloads/Jingle/intro - maya.mp3"
+						},
+						{
+							"key": "files",
+							"type": "file",
+							"src": "/Users/kamilbytner/Downloads/Jingle/Intro_sunshine.mp3"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7071/api/MergeAudio",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"api",
+						"MergeAudio"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
