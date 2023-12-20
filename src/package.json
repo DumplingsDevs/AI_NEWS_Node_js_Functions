@@ -2,7 +2,7 @@
   "name": "node_js_functions",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/src/functions/MergeAudio/*.js",
+  "main": "dist/src/functions/*.js",
   "scripts": {
     "build": "tsc && cp src/functions/function.json dist/src/functions/",
     "watch": "tsc -w",
