@@ -1,20 +1,14 @@
-import {
-  app,
-  HttpRequest,
-  HttpResponseInit,
-  InvocationContext,
-} from "@azure/functions";
-import * as Ffmpeg from "fluent-ffmpeg";
-import * as multipart from "parse-multipart";
-import * as os from "os";
-import path = require("path");
-import * as fs from "fs";
-import * as ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import { app } from "@azure/functions";
+import Ffmpeg from "fluent-ffmpeg";
+import multipart from "parse-multipart";
+import os from "os";
+import path from "path";
+import fs from "fs";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import ffprobeInstaller from "@ffprobe-installer/ffprobe";
+Ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
-export async function MergeAudio(
-  request: HttpRequest,
-  context: InvocationContext
-): Promise<HttpResponseInit> {
+async function MergeAudio(request, context) {
   context.log(`Http function processed request for url "${request.url}"`);
 
   const files = await getFormFiles(request);
@@ -44,7 +38,7 @@ app.http("MergeAudio", {
   handler: MergeAudio,
 });
 
-const mergeMP3Files = (files, outputFile) => {
+function mergeMP3Files(files, outputFile) {
   return new Promise((resolve, reject) => {
     Ffmpeg.setFfmpegPath(ffmpegInstaller.path);
     const merged = Ffmpeg();
@@ -58,20 +52,15 @@ const mergeMP3Files = (files, outputFile) => {
       })
       .mergeToFile(outputFile, os.tmpdir());
   });
-};
+}
 
-const getFormFiles = async (
-  request: HttpRequest
-): Promise<multipart.ParsedFile[]> => {
+async function getFormFiles(request) {
   const buffer = await request.arrayBuffer();
   const boundary = multipart.getBoundary(request.headers.get("Content-Type"));
   return multipart.Parse(Buffer.from(buffer), boundary);
-};
+}
 
-const pushTempFiles = (
-  tempDir: string,
-  files: multipart.ParsedFile[]
-): string[] => {
+function pushTempFiles(tempDir, files) {
   const tempFiles = [];
 
   files.forEach((file, index) => {
@@ -81,16 +70,16 @@ const pushTempFiles = (
   });
 
   return tempFiles;
-};
+}
 
-function formatCurrentDateTime(): string {
+function formatCurrentDateTime() {
   const now = new Date();
 
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
   const seconds = String(now.getSeconds()).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
-  const month = String(now.getMonth() + 1).padStart(2, "0"); // Dodaj 1, ponieważ miesiące są numerowane od 0 do 11
+  const month = String(now.getMonth() + 1).padStart(2, "0");
   const year = String(now.getFullYear());
 
   return `${hours}_${minutes}_${seconds}_${day}_${month}_${year}`;
