@@ -132,3 +132,10 @@ src/.vscode/extensions.json
 src/.vscode/launch.json
 src/.vscode/settings.json
 src/.vscode/tasks.json
+
+.vscode/extensions.json
+.vscode/launch.json
+.vscode/settings.json
+.vscode/tasks.json
+
+.DS_Store
