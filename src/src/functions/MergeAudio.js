@@ -4,12 +4,12 @@ import multipart from "parse-multipart";
 import os from "os";
 import path from "path";
 import fs from "fs";
-import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
-import ffprobeInstaller from "@ffprobe-installer/ffprobe";
-Ffmpeg.setFfprobePath(ffprobeInstaller.path);
+import * as ffprobe from "ffprobe-static";
+import * as ffmpeg from "ffmpeg-static";
 
 async function MergeAudio(request, context) {
   context.log(`Http function processed request for url "${request.url}"`);
+  Ffmpeg.setFfprobePath(ffprobe.path);
 
   const files = await getFormFiles(request);
   const tempDir = os.tmpdir();
@@ -40,9 +40,9 @@ app.http("MergeAudio", {
 
 function mergeMP3Files(files, outputFile) {
   return new Promise((resolve, reject) => {
-    Ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+    Ffmpeg.setFfmpegPath(ffmpeg.default);
     const merged = Ffmpeg();
-    files.forEach((file) => merged.input(file));
+    files.forEach((file) => merged.input(file).withAudioBitrate(192));
     merged
       .on("error", function (err) {
         reject("An error occurred: " + err.message);
