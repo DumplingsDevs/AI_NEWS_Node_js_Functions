@@ -38,6 +38,12 @@ app.http("MergeAudio", {
   handler: MergeAudio,
 });
 
+app.http("MergeAudioV2", {
+  methods: ["POST"],
+  authLevel: "function",
+  handler: MergeAudio,
+});
+
 function mergeMP3Files(files, outputFile) {
   return new Promise((resolve, reject) => {
     Ffmpeg.setFfmpegPath(ffmpeg.default);
