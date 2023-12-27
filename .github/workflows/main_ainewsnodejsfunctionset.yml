@@ -66,6 +66,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete old artifacts
-        uses: geekyeggo/delete-artifact@v1
+      - uses: geekyeggo/delete-artifact@v4
         with:
-          age: '1 day' 
+          name: |
+              artifact-*
+              binary-file
+              output
