@@ -69,7 +69,4 @@ jobs:
       uses: geekyeggo/delete-artifact@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        name: |
-          artifact-*
-          binary-file
-          output
+        name: '*'
