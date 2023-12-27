@@ -62,32 +62,10 @@ jobs:
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_861BC2A3C07249CB9C1C88FECB38C840 }}
     
-  cleanup_old_artifacts:
+  delete_artifacts:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write
     steps:
-      - name: Delete Old Artifacts
-        uses: actions/github-script@v6
+      - name: Delete old artifacts
+        uses: geekyeggo/delete-artifact@v1
         with:
-          script: |
-            const res = await github.rest.actions.listArtifactsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-
-            const deletePromises = res.data.artifacts.map(async ({ id }) => {
-              try {
-                await github.rest.actions.deleteArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: id,
-                });
-                console.log(`Artifact with ID ${id} deleted.`);
-              } catch (error) {
-                console.error(`Error deleting artifact with ID ${id}:`, error);
-              }
-            });
-
-            await Promise.all(deletePromises);
+          age: '1 day' 
