@@ -61,12 +61,3 @@ jobs:
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_861BC2A3C07249CB9C1C88FECB38C840 }}
-    
-  delete_artifacts:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Delete old artifacts
-      uses: geekyeggo/delete-artifact@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        name: '*'
