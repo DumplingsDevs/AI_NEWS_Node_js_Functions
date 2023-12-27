@@ -65,10 +65,10 @@ jobs:
   delete_artifacts:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete old artifacts
-      - uses: geekyeggo/delete-artifact@v4
-        with:
-          name: |
-              artifact-*
-              binary-file
-              output
+    - name: Delete old artifacts
+      uses: geekyeggo/delete-artifact@v4
+      with:
+        name: |
+          artifact-*
+          binary-file
+          output
