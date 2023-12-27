@@ -64,7 +64,6 @@ jobs:
     
   cleanup_old_artifacts:
     runs-on: ubuntu-latest
-    needs: deploy
     permissions:
       contents: read
       actions: write
@@ -76,13 +75,19 @@ jobs:
             const res = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-            })
-  
-            res.data.artifacts
-              .forEach(({ id }) => {
-                github.rest.actions.deleteArtifact({
+            });
+
+            const deletePromises = res.data.artifacts.map(async ({ id }) => {
+              try {
+                await github.rest.actions.deleteArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   artifact_id: id,
-                })
-              })
+                });
+                console.log(`Artifact with ID ${id} deleted.`);
+              } catch (error) {
+                console.error(`Error deleting artifact with ID ${id}:`, error);
+              }
+            });
+
+            await Promise.all(deletePromises);
