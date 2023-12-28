@@ -12,7 +12,26 @@ async function MergeAudio(request, context) {
     context.log(`Http function processed request for url "${request.url}"`);
     Ffmpeg.setFfprobePath(ffprobe.path);
 
+    const contentType = request.headers.get("Content-Type");
+    if (!contentType || !contentType.includes("multipart/form-data")) {
+      context.log('Invalid content type. Expecting multipart/form-data.');
+      
+      return {
+        status: 400,
+        body: "Invalid content type. Expecting multipart/form-data. Most probably you haven't attached any files in request body!"
+      };
+    }
+
     const files = await getFormFiles(request, context);
+
+    if (files.length < 2) {
+      context.log('Error: Less than 2 files provided');
+      return {
+        status: 400,
+        body: "At least 2 files are required for merging"
+      };
+    }
+
     const tempDir = os.tmpdir();
     const tempFiles = pushTempFiles(tempDir, files, context);
     const outputPath = path.join(os.tmpdir(), "merged.mp3");
@@ -33,7 +52,7 @@ async function MergeAudio(request, context) {
     };
   } catch (error) {
     context.log(`Error in MergeAudio function: ${error}`);
-    
+
     return {
       status: 500,
       body: "Internal server error",
