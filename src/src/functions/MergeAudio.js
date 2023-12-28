@@ -32,7 +32,8 @@ async function MergeAudio(request, context) {
       body: mergedFileData,
     };
   } catch (error) {
-    context.log.error(`Error in MergeAudio function: ${error}`);
+    context.log(`Error in MergeAudio function: ${error}`);
+    
     return {
       status: 500,
       body: "Internal server error",
@@ -62,7 +63,7 @@ function mergeMP3Files(files, outputFile, context) {
         })
         .mergeToFile(outputFile, os.tmpdir());
     } catch (error) {
-      context.log.error(`Error in mergeMP3Files: ${error}`);
+      context.log(`Error in mergeMP3Files: ${error}`);
       reject(error);
     }
   });
@@ -74,7 +75,7 @@ async function getFormFiles(request, context) {
     const boundary = multipart.getBoundary(request.headers.get("Content-Type"));
     return multipart.Parse(Buffer.from(buffer), boundary);
   } catch (error) {
-    context.log.error(`Error in getFormFiles: ${error}`);
+    context.log(`Error in getFormFiles: ${error}`);
     throw error;
   }
 }
@@ -91,7 +92,7 @@ function pushTempFiles(tempDir, files, context) {
 
     return tempFiles;
   } catch (error) {
-    context.log.error(`Error in pushTempFiles: ${error}`);
+    context.log(`Error in pushTempFiles: ${error}`);
     throw error;
   }
 }
