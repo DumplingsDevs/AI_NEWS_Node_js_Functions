@@ -42,12 +42,6 @@ async function MergeAudio(request, context) {
 
 app.http("MergeAudio", {
   methods: ["POST"],
-  authLevel: "anonymous",
-  handler: MergeAudio,
-});
-
-app.http("MergeAudioV2", {
-  methods: ["POST"],
   authLevel: "function",
   handler: MergeAudio,
 });
