@@ -8,28 +8,36 @@ import * as ffprobe from "ffprobe-static";
 import * as ffmpeg from "ffmpeg-static";
 
 async function MergeAudio(request, context) {
-  context.log(`Http function processed request for url "${request.url}"`);
-  Ffmpeg.setFfprobePath(ffprobe.path);
+  try {
+    context.log(`Http function processed request for url "${request.url}"`);
+    Ffmpeg.setFfprobePath(ffprobe.path);
 
-  const files = await getFormFiles(request);
-  const tempDir = os.tmpdir();
-  const tempFiles = pushTempFiles(tempDir, files);
-  const outputPath = path.join(os.tmpdir(), "merged.mp3");
-  await mergeMP3Files(tempFiles, outputPath);
+    const files = await getFormFiles(request, context);
+    const tempDir = os.tmpdir();
+    const tempFiles = pushTempFiles(tempDir, files, context);
+    const outputPath = path.join(os.tmpdir(), "merged.mp3");
+    await mergeMP3Files(tempFiles, outputPath, context);
 
-  const mergedFileData = fs.readFileSync(outputPath);
+    const mergedFileData = fs.readFileSync(outputPath);
 
-  tempFiles.forEach((file) => fs.unlinkSync(file));
-  fs.unlinkSync(outputPath);
+    tempFiles.forEach((file) => fs.unlinkSync(file));
+    fs.unlinkSync(outputPath);
 
-  return {
-    status: 200,
-    headers: {
-      "Content-Type": "application/octet-stream",
-      "content-disposition": `attachment;filename=output_${formatCurrentDateTime()}.mp3`,
-    },
-    body: mergedFileData,
-  };
+    return {
+      status: 200,
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "content-disposition": `attachment;filename=output_${formatCurrentDateTime()}.mp3`,
+      },
+      body: mergedFileData,
+    };
+  } catch (error) {
+    context.log.error(`Error in MergeAudio function: ${error}`);
+    return {
+      status: 500,
+      body: "Internal server error",
+    };
+  }
 }
 
 app.http("MergeAudio", {
@@ -44,38 +52,54 @@ app.http("MergeAudioV2", {
   handler: MergeAudio,
 });
 
-function mergeMP3Files(files, outputFile) {
+function mergeMP3Files(files, outputFile, context) {
   return new Promise((resolve, reject) => {
-    Ffmpeg.setFfmpegPath(ffmpeg.default);
-    const merged = Ffmpeg();
-    files.forEach((file) => merged.input(file).withAudioBitrate(192));
-    merged
-      .on("error", function (err) {
-        reject("An error occurred: " + err.message);
-      })
-      .on("end", function () {
-        resolve(true);
-      })
-      .mergeToFile(outputFile, os.tmpdir());
+    try {
+      Ffmpeg.setFfmpegPath(ffmpeg.default);
+      const merged = Ffmpeg();
+      files.forEach((file) => merged.input(file).withAudioBitrate(192));
+      merged
+        .on("error", function (err) {
+          context.log.error(`Error merging files: ${err.message}`);
+          reject("An error occurred: " + err.message);
+        })
+        .on("end", function () {
+          resolve(true);
+        })
+        .mergeToFile(outputFile, os.tmpdir());
+    } catch (error) {
+      context.log.error(`Error in mergeMP3Files: ${error}`);
+      reject(error);
+    }
   });
 }
 
-async function getFormFiles(request) {
-  const buffer = await request.arrayBuffer();
-  const boundary = multipart.getBoundary(request.headers.get("Content-Type"));
-  return multipart.Parse(Buffer.from(buffer), boundary);
+async function getFormFiles(request, context) {
+  try {
+    const buffer = await request.arrayBuffer();
+    const boundary = multipart.getBoundary(request.headers.get("Content-Type"));
+    return multipart.Parse(Buffer.from(buffer), boundary);
+  } catch (error) {
+    context.log.error(`Error in getFormFiles: ${error}`);
+    throw error;
+  }
 }
 
-function pushTempFiles(tempDir, files) {
-  const tempFiles = [];
+function pushTempFiles(tempDir, files, context) {
+  try {
+    const tempFiles = [];
 
-  files.forEach((file, index) => {
-    const filePath = path.join(tempDir, `file${index}.mp3`);
-    fs.writeFileSync(filePath, file.data);
-    tempFiles.push(filePath);
-  });
+    files.forEach((file, index) => {
+      const filePath = path.join(tempDir, `file${index}.mp3`);
+      fs.writeFileSync(filePath, file.data);
+      tempFiles.push(filePath);
+    });
 
-  return tempFiles;
+    return tempFiles;
+  } catch (error) {
+    context.log.error(`Error in pushTempFiles: ${error}`);
+    throw error;
+  }
 }
 
 function formatCurrentDateTime() {
