@@ -10,12 +10,17 @@ import * as ffmpeg from "ffmpeg-static";
 async function NormalizeAudio(request, context) {
     try {
         context.log(`Http function processed request for url "${request.url}"`);
+
         Ffmpeg.setFfprobePath(ffprobe.path);
+
+        const eValue = 12.5;
+        const rValue = 0.0001;
+        const lValue = 1;
+        const bitrate = "192k";
 
         const contentType = request.headers.get("Content-Type");
         if (!contentType || !contentType.includes("multipart/form-data")) {
             context.log('Invalid content type. Expecting multipart/form-data.');
-
             return {
                 status: 400,
                 body: "Invalid content type. Expecting multipart/form-data."
@@ -37,7 +42,7 @@ async function NormalizeAudio(request, context) {
         fs.writeFileSync(originalFilePath, files[0].data);
 
         const normalizedFilePath = path.join(tempDir, 'normalized.mp3');
-        await normalizeAudioFile(originalFilePath, normalizedFilePath, context);
+        await normalizeAudioFile(originalFilePath, normalizedFilePath, bitrate, eValue, rValue, lValue, context);
 
         const normalizedFileData = fs.readFileSync(normalizedFilePath);
 
@@ -68,14 +73,15 @@ app.http("NormalizeAudio", {
     handler: NormalizeAudio,
 });
 
-function normalizeAudioFile(inputFile, outputFile, context) {
+function normalizeAudioFile(inputFile, outputFile, bitrate, eValue, rValue, lValue, context) {
     return new Promise((resolve, reject) => {
         try {
             Ffmpeg.setFfmpegPath(ffmpeg.default);
             Ffmpeg(inputFile)
-                .audioFilters('loudnorm')
+                .audioBitrate(bitrate)
+                .audioFilters(`speechnorm=e=${eValue}:r=${rValue}:l=${lValue}`)
                 .on("error", function (err) {
-                    context.log.error(`Error normalizing file: ${err.message}`);
+                    context.log(`Error normalizing file: ${err.message}`);
                     reject("An error occurred: " + err.message);
                 })
                 .on("end", function () {
