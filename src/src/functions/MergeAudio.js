@@ -1,6 +1,6 @@
 import { app } from "@azure/functions";
 import Ffmpeg from "fluent-ffmpeg";
-import multipart from "parse-multipart";
+import multipart from "parse-multipart-data";
 import os from "os";
 import path from "path";
 import fs from "fs";
@@ -14,21 +14,21 @@ async function MergeAudio(request, context) {
 
     const contentType = request.headers.get("Content-Type");
     if (!contentType || !contentType.includes("multipart/form-data")) {
-      context.log('Invalid content type. Expecting multipart/form-data.');
-      
+      context.log("Invalid content type. Expecting multipart/form-data.");
+
       return {
         status: 400,
-        body: "Invalid content type. Expecting multipart/form-data. Most probably you haven't attached any files in request body!"
+        body: "Invalid content type. Expecting multipart/form-data. Most probably you haven't attached any files in request body!",
       };
     }
 
     const files = await getFormFiles(request, context);
 
     if (files.length < 2) {
-      context.log('Error: Less than 2 files provided');
+      context.log("Error: Less than 2 files provided");
       return {
         status: 400,
-        body: "At least 2 files are required for merging"
+        body: "At least 2 files are required for merging",
       };
     }
 
@@ -92,7 +92,7 @@ async function getFormFiles(request, context) {
   try {
     const buffer = await request.arrayBuffer();
     const boundary = multipart.getBoundary(request.headers.get("Content-Type"));
-    return multipart.Parse(Buffer.from(buffer), boundary);
+    return multipart.parse(Buffer.from(buffer), boundary);
   } catch (error) {
     context.log(`Error in getFormFiles: ${error}`);
     throw error;
